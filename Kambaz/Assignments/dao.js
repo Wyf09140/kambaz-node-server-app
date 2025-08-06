@@ -1,16 +1,21 @@
+// Kambaz/Assignments/dao.js
 import Database from "../Database/index.js";
 import { v4 as uuidv4 } from "uuid";
 
-let assignments = db.assignments;
-const save = (next) => { assignments = next; db.assignments = next; };
+// 统一的读/写入口，避免使用本地副本
+const getAll = () => Database.assignments;
+const saveAll = (next) => { Database.assignments = next; };
 
+/** 查询：某课程的所有作业 */
 export const findAssignmentsForCourse = (cid) =>
-  assignments.filter((a) => a.course === cid);
+  getAll().filter((a) => a.course === cid);
 
+/** 查询：按作业 ID */
 export const findAssignmentById = (aid) =>
-  assignments.find((a) => a._id === aid);
+  getAll().find((a) => a._id === aid);
 
-export const createAssignment = (cid, assignment) => {
+/** 新建作业 */
+export const createAssignment = (cid, assignment = {}) => {
   const fresh = {
     _id: uuidv4(),
     course: cid,
@@ -22,21 +27,20 @@ export const createAssignment = (cid, assignment) => {
     untilDate: null,
     ...assignment,
   };
-  const next = [...assignments, fresh];
-  save(next);
+  saveAll([...getAll(), fresh]);
   return fresh;
 };
 
+/** 更新作业 */
 export const updateAssignment = (aid, updates) => {
-  const next = assignments.map((a) =>
-    a._id === aid ? { ...a, ...updates } : a
-  );
-  save(next);
+  const next = getAll().map((a) => (a._id === aid ? { ...a, ...updates } : a));
+  saveAll(next);
   return { acknowledged: true };
 };
 
+/** 删除作业 */
 export const deleteAssignment = (aid) => {
-  const next = assignments.filter((a) => a._id !== aid);
-  save(next);
+  const next = getAll().filter((a) => a._id !== aid);
+  saveAll(next);
   return { acknowledged: true };
 };
