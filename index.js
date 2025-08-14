@@ -8,14 +8,23 @@ import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import Lab5 from "./Lab5/index.js";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
+import mongoose from "mongoose";                 // ⬅️ 一定要有这行
+import EnrollmentsRoutes from "./Kambaz/Enrollments/routes.js";
 
+
+const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz"
+mongoose.connect(CONNECTION_STRING);
 const app = express();
 
-// ✅ CORS 必须允许凭证，并且 origin 必须与前端一致
 app.use(cors({
   credentials: true,
-  origin: process.env.NETLIFY_URL || "http://localhost:5173",
+  origin: [
+    "https://a5--cosmic-pithivier-a2929c.netlify.app",
+    "https://a6--cosmic-pithivier-a2929c.netlify.app",
+    "http://localhost:5173"
+  ],
 }));
+
 
 // ✅ 解析 JSON —— 放在路由之前
 app.use(express.json());
@@ -38,7 +47,7 @@ CourseRoutes(app);
 Lab5(app);
 ModuleRoutes(app);
 AssignmentRoutes(app);
-
+EnrollmentsRoutes(app);
 app.get("/", (req, res) => {
   res.send("Backend is running!");
 });
